@@ -19,12 +19,12 @@ int day_index(int date, int month, int year)
         y--;    //  Jan and Feb treated as a part of the previous year
 
     //  the formula
-    int i = (date + (((13*month_code(month))-1)/5) + (y%100) + ((y%100)/4) + ((y/100)/4) - 2*(y/100));
-    int f = i % 7;
+    int f = (date + (((13*month_code(month))-1)/5) + (y%100) + ((y%100)/4) + ((y/100)/4) - 2*(y/100));
+    int i = f % 7;
 
-    if(f<0) //  if negative, adjust remainder
-        f+=7;
-    return f;
+    if(i<0) //  if negative, adjust remainder
+        i+=7;
+    return i;
 }
 
 //  checks whether a year is leap or not
