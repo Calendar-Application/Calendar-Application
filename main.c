@@ -1,170 +1,156 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
+#include <string.h>
 
-// Declaration of variables:
-
-int year, monthIndex, daysIndex, firstDayIndex, weekDayIndex, daysOfWeekIndex, monthInput;
-
-char *month[]= {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-int daysOfMonth[]= {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-char *daysOfWeek[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-
-// Checking whether year is leap or not
-
-int leapCheck(int year) {
-    if((year % 4 == 0 && year %100 !=0) || year % 400 == 0) {
-        return 29;
-    }
-    return 28;
+int month_code(int month)
+{
+    const int c[]={11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    return c[month-1];
 }
 
-// getting the index of the first day of the year:
+int day_index(int date, int month, int year)
+{
+    int y=year;
+    if(month==1 || month==2)
+        y--;
 
-int getFirstDayIndex(int year){
-    
-    int day = (((year - 1) * 365) + ((year - 1) / 4) - ((year - 1) / 100) + ((year) / 400) + 1) % 7;
-    return day;
+    int i = (date + (((13*month_code(month))-1)/5) + (y%100) + ((y%100)/4) + ((y/100)/4) - 2*(y/100));
+    int f = i % 7;
+
+    if(f<0)
+        f+=7;
+    return f;
 }
 
-// Method to call if user wants calendar in year format :
+bool is_leap(int year)
+{
+    if((year % 4 == 0 && year %100 !=0) || year % 400 == 0)
+        return true;
+    else
+        return false;
+}
 
-void yearView() {
-    printf("Enter year: ");
-    scanf("%d",&year);
-    
-    daysOfMonth[1] = leapCheck(year);
-    
-    firstDayIndex = getFirstDayIndex(year);
-    
-    for (monthIndex = 0; monthIndex < 12; monthIndex++) {
-        
-        printf("\n\n\t\t** %s **\n\n",month[monthIndex]);
-        
-        for (daysOfWeekIndex = 0; daysOfWeekIndex < 7; daysOfWeekIndex++) {
-            
-            //TODO: Need to check if the color works both in gcc and mingw compiler
-            
-            //            if (daysOfWeekIndex == 0) {
-            //                printf("\033[1;31m");
-            //            }
-            printf("%s\t", daysOfWeek[daysOfWeekIndex]);
-            //            printf("\033[0m");
+int no_days_in_month(int month, int year)
+{
+    const int d[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if(is_leap(year) && month==2)
+        return (d[month-1]+1);
+    else
+        return d[month-1];
+}
+
+void month_matrix(int month_m[6][7], int month, int year)
+{
+    int i;
+    for(i=0; i<6; i++)
+        for(int j=0; j<7; j++)
+            month_m[i][j]=0;
+
+    int k = day_index(1, month, year);
+    int days = no_days_in_month(month, year);
+
+    i=0;
+    int d=1;
+    while(1)
+    {
+        month_m[i][k]=d;
+
+        if(k==6)
+        {
+            i++;
+            k=0;
         }
-        
+        else
+            k++;
+
+        if(d==days)
+            break;
+        else
+            d++;
+    }
+}
+
+char* get_month_name(int month)
+{
+    char* m[] = {"January", "February", "March", "April", "May", "June", "July",
+    "August", "September", "October", "November", "December"};
+
+    return m[month-1];
+}
+
+void print_month(int matrix[6][7], int month)
+{
+    int space = (int)((27 - strlen(get_month_name(month)))/2);
+    for(int i=0; i<space; i++)
+        printf(" ");
+
+    printf("%s\n", get_month_name(month));
+    printf("Sun Mon Tue Wed Thu Fri Sat\n");
+
+    for(int i=0; i<6; i++)
+    {
+        for(int j=0; j<7; j++)
+        {
+            if(matrix[i][j]==0)
+                printf("   ");
+            else
+                printf("%3d", matrix[i][j]);
+            printf(" ");
+        }
         printf("\n");
-        
-        for(weekDayIndex = 0; weekDayIndex <= firstDayIndex - 1; weekDayIndex++) {
-            
-            printf("\t ");
-        }
-        
-        for (daysIndex = 1; daysIndex <= daysOfMonth[monthIndex]; daysIndex++) {
-            
-            //TODO: Need to check if the color works both in gcc and mingw compiler
-            
-            //            if (weekDayIndex == 0) {
-            //                printf("\033[1;31m");
-            //            }
-            printf("%d\t ", daysIndex);
-            //            printf("\033[0m");
-            weekDayIndex++;
-            
-            if (weekDayIndex > 6) {
-                
-                printf("\n");
-                weekDayIndex = 0;
-            }
-            
-            firstDayIndex = weekDayIndex;
-        }
     }
 }
 
-// Method to call if user wants calendar in month format :
+void print_year(int year)
+{
+    int month_m[6][7];
 
-void monthView() {
-    printf("Enter year: ");
-    scanf("%d",&year);
-    printf("Enter month number: ");
-    scanf("%d", &monthInput);
-    
-    daysOfMonth[1] = leapCheck(year);
-    
-    firstDayIndex = getFirstDayIndex(year);
-    
-    printf("\n\n\t** 2018 %s **\n\n",month[monthInput - 1]);
-    
-    for (monthIndex = 0; monthIndex < monthInput; monthIndex++) {
-        
-        if (monthIndex == monthInput - 1) {
-            for (daysOfWeekIndex = 0; daysOfWeekIndex < 7; daysOfWeekIndex++) {
-                
-                //TODO: Need to check if the color works both in gcc and mingw compiler
-                
-                //                if (daysOfWeekIndex == 0) {
-                //                    printf("\033[1;31m");
-                //                }
-                printf("%s\t", daysOfWeek[daysOfWeekIndex]);
-                //                printf("\033[0m");
-            }
-            printf("\n");
-        }
-        
-        for(weekDayIndex = 0; weekDayIndex <= firstDayIndex - 1; weekDayIndex++) {
-            if (monthIndex == monthInput - 1) {
-                printf("\t ");
-            }
-            
-        }
-        
-        for (daysIndex = 1; daysIndex <= daysOfMonth[monthIndex]; daysIndex++) {
-            if (monthIndex == monthInput - 1) {
-                
-                //TODO: Need to check if the color works both in gcc and mingw compiler
-                
-                //                if (weekDayIndex == 0) {
-                //                    printf("\033[1;31m");
-                //                }
-                printf("%d\t ", daysIndex);
-                //                printf("\033[0m");
-            }
-            
-            weekDayIndex++;
-            
-            if (weekDayIndex > 6) {
-                if (monthIndex == monthInput - 1) {
-                    printf("\n");
-                }
-                
-                weekDayIndex = 0;
-            }
-            
-            firstDayIndex = weekDayIndex;
-        }
+    int dig = floor(log10(year))+1;
+    int space = (int)((27 - dig)/2);
+    for(int i=0; i<space; i++)
+        printf(" ");
+
+    printf("%d\n\n", year);
+
+    for(int i=0; i<12; i++)
+    {
+        month_matrix(month_m, i+1, year);
+        print_month(month_m, i+1);
+        printf("\n");
     }
 }
 
-// Main function:
+int main()
+{
+    int choice, month, year, month_m[6][7];
 
-int main() {
-    int choice;
-    
     printf("Enter 1 - Year view || 2 - Month View: ");
     scanf("%d", &choice);
-    
-    switch (choice) {
+
+    switch (choice)
+    {
         case 1:
-            yearView();
+            printf("Enter Year: ");
+            scanf("%d", &year);
+
+            print_year(year);
+
             break;
         case 2:
-            monthView();
+            printf("Enter Month and Year: ");
+            scanf("%d%d", &month, &year);
+
+            month_matrix(month_m, month, year);
+            print_month(month_m, month);
+
             break;
-            
+
         default:
             printf("Wrong choice");
             break;
     }
     printf("\n\n");
     return 0;
-    
+
 }
