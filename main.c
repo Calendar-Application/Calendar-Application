@@ -11,6 +11,7 @@ int month_code(int month)
 }
 
 //  returns the day index number depending upon the date, month and year
+//  read this: http://mathforum.org/dr.math/faq/faq.calendar.html
 int day_index(int date, int month, int year)
 {
     int y=year;
@@ -27,13 +28,13 @@ int day_index(int date, int month, int year)
 }
 
 //  checks whether a year is leap or not
-bool is_leap(int year)
+int is_leap(int year)
 {
     //  leap condition
     if((year % 4 == 0 && year %100 !=0) || year % 400 == 0)
-        return true;
+        return 1;
     else
-        return false;
+        return 0;
 }
 
 //  calculated the number of days in each month
