@@ -49,7 +49,7 @@ int no_days_in_month(int month, int year)
 }
 
 //  create the month matrix
-void month_matrix(int month_m[6][7], int month, int year)
+int month_matrix(int month_m[6][7], int month, int year)
 {
     int i;
     //  initialising the total matrix as 0
@@ -70,7 +70,7 @@ void month_matrix(int month_m[6][7], int month, int year)
     {
         month_m[i][k]=d;
 
-        if(k==6)    //  smooth edges to next line
+        if(k==6)    //  smoothen edges to next line
         {
             i++;
             k=0;
@@ -83,6 +83,12 @@ void month_matrix(int month_m[6][7], int month, int year)
         else
             d++;
     }
+
+    //  returning no. of rows, i.e. no. of weeks
+    if(k==0)
+        return i;
+    else
+        return i+1;
 }
 
 //  get the name of the months
@@ -94,7 +100,8 @@ char* get_month_name(int month)
     return m[month-1];
 }
 
-//  print a specified month
+//  print a specified month (old one: w/o borders)
+/*
 void print_month(int matrix[6][7], int month)
 {
     //  print the month name in center alignment
@@ -119,6 +126,83 @@ void print_month(int matrix[6][7], int month)
         printf("\n");
     }
 }
+*/
+
+//  print a specified month with borders
+void print_month(int matrix[6][7], int month, int rows)
+{
+    printf("%c", 201);
+    for(int i=0; i<27; i++)
+        printf("%c", 205);
+    printf("%c\n", 187);
+
+    //  print the month name in center alignment
+    int space = (int)((27 - strlen(get_month_name(month)))/2);
+    printf("%c", 186);
+    for(int i=0; i<space; i++)
+        printf(" ");
+
+    space=27-space-strlen(get_month_name(month));
+    printf("%s", get_month_name(month));
+    for(int i=0; i<space; i++)
+        printf(" ");
+    printf("%c\n", 186);
+
+    printf("%c", 199);
+    for(int i=0; i<7; i++)
+    {
+        for(int j=0; j<3; j++)
+            printf("%c", 196);
+        printf("%c", 194);
+    }
+    printf("\b%c\n", 182);
+
+    printf("%cSun%cMon%cTue%cWed%cThu%cFri%cSat%c\n", 186, 179, 179, 179, 179, 179, 179, 186);
+
+    printf("%c", 199);
+    for(int i=0; i<7; i++)
+    {
+        for(int j=0; j<3; j++)
+            printf("%c", 196);
+        printf("%c", 197);
+    }
+    printf("\b%c", 182);
+
+    //  print the month matrix
+    for(int i=0; i<rows; i++)
+    {
+        printf("\n%c", 186);
+        for(int j=0; j<7; j++)
+        {
+            if(matrix[i][j]==0)
+                printf("   ");  //  if 0, its no day :(
+            else
+                printf("%3d", matrix[i][j]);    //  setw with spaces
+            printf("%c", 179);
+        }
+        printf("\b%c", 186);
+
+        printf("\n%c", 199);
+        for(int i=0; i<7; i++)
+        {
+            for(int j=0; j<3; j++)
+                printf("%c", 196);
+            printf("%c", 197);
+        }
+        printf("\b%c", 182);
+
+        //printf("\n");
+    }
+
+    printf("\r%c", 200);
+    for(int i=0; i<7; i++)
+    {
+        for(int j=0; j<3; j++)
+            printf("%c", 205);
+        printf("%c", 207);
+    }
+    printf("\b%c\n", 188);
+}
 
 //  print a total year
 void print_year(int year)
@@ -128,6 +212,7 @@ void print_year(int year)
     //  print the year in center alignment
     int dig = floor(log10(year))+1;
     int space = (int)((27 - dig)/2);
+    printf("\n");
     for(int i=0; i<space; i++)
         printf(" ");
 
@@ -136,11 +221,25 @@ void print_year(int year)
     //  print each month iteratively
     for(int i=0; i<12; i++)
     {
-        month_matrix(month_m, i+1, year);
-        print_month(month_m, i+1);
+        int rows=month_matrix(month_m, i+1, year);
+        print_month(month_m, i+1, rows);
         printf("\n");
     }
 }
+
+//  test main: ignore this
+/*int main()
+{
+    int month=9, year=2018, month_m[6][7];
+
+    //month_matrix(month_m, month, year);
+    //print_month(month_m, month);
+
+    print_year(year);
+
+    return 0;
+
+}*/
 
 //  main function
 int main()
@@ -163,8 +262,16 @@ int main()
             printf("Enter Month and Year: ");
             scanf("%d%d", &month, &year);
 
-            month_matrix(month_m, month, year);
-            print_month(month_m, month);
+            int dig = floor(log10(year))+1;
+            int space = (int)((27 - dig)/2);
+            printf("\n");
+            for(int i=0; i<space; i++)
+                printf(" ");
+
+            printf("%d\n", year);
+
+            int rows = month_matrix(month_m, month, year);
+            print_month(month_m, month, rows);
 
             break;
 
