@@ -1,7 +1,16 @@
 #include <stdio.h>
+#include <conio.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <process.h>
 #include <math.h>
+#include <time.h>
 #include <string.h>
+
+struct date_time
+{
+    int _sec, _min, _hour, _mday, _mon, _year,  _wday;
+};
 
 //  returns specific codes for each month: considering March as the start of the year
 int month_code(int month)
@@ -227,59 +236,106 @@ void print_year(int year)
     }
 }
 
-//  test main: ignore this
-/*int main()
+//  print the year number on the head
+void print_year_num(int year)
 {
-    int month=9, year=2018, month_m[6][7];
+    //  print year number
+    int dig = floor(log10(year))+1;
+    int space = (int)((27 - dig)/2);
+    printf("\n");
+    for(int i=0; i<space; i++)
+        printf(" ");
 
-    //month_matrix(month_m, month, year);
-    //print_month(month_m, month);
-
-    print_year(year);
-
-    return 0;
-
-}*/
+    printf("%d\n\n", year);
+}
 
 //  main function
 int main()
 {
-    int choice, month, year, month_m[6][7];
+    int month, year, month_m[6][7];
 
-    printf("Enter 1 - Year view || 2 - Month View: ");
-    scanf("%d", &choice);
+    struct date_time T;
+    time_t t = time(0);   // get time now
+    struct tm* now = localtime(&t);
+    T._mon=now->tm_mon+1;
+    T._year=now->tm_year + 1900;
 
-    switch (choice)
+    month=T._mon;   //  initially set month as the current month
+    year=T._year;   //  initially set year as the current year
+
+    int view=0;
+    //  0 for month and 1 for year
+
+    char key;
+    do
     {
-        case 1: //  year view
-            printf("Enter Year: ");
-            scanf("%d", &year);
-
-            print_year(year);
-
-            break;
-        case 2: //  month view
-            printf("Enter Month and Year: ");
-            scanf("%d%d", &month, &year);
-
-            int dig = floor(log10(year))+1;
-            int space = (int)((27 - dig)/2);
-            printf("\n");
-            for(int i=0; i<space; i++)
-                printf(" ");
-
-            printf("%d\n", year);
-
+        system("cls");
+        switch(view)    //  switch year/month view
+        {
+        case 0:
+            print_year_num(year);
+            //  print month matrix
             int rows = month_matrix(month_m, month, year);
             print_month(month_m, month, rows);
 
             break;
 
-        default:
-            printf("Wrong choice");
+        case 1:
+            print_year(year);
             break;
-    }
-    printf("\n\n");
-    return 0;
+        }
 
+        //  handle the keys
+        key = getch();
+        if(key == -32)
+        {
+            key = getch();
+            if(view == 0)
+            {
+                switch(key)
+                {
+                    case 72:    year--;     break;  //  up arrow pressed
+                    case 80:    year++;     break;  //  down arrow pressed
+                    case 75:    month--;    break;  //  left arrow pressed
+                    case 77:    month++;    break;  //  right arrow pressed
+                }
+            }
+
+            else if(view == 1)
+            {
+                switch(key)
+                {
+                    case 72:    year--;     break;  //  up arrow pressed
+                    case 80:    year++;     break;  //  down arrow pressed
+                    case 75:    year--;    break;  //  left arrow pressed
+                    case 77:    year++;    break;  //  right arrow pressed
+                }
+            }
+
+            if(month==13)
+            {
+                year++;
+                month=1;
+            }
+
+            else if(month==0)
+            {
+                year--;
+                month=1;
+            }
+        }
+        else if(key == 'Y' || key == 'y')   //  year view
+            view = 1;
+        else if(key == 'M' || key == 'm')   //  month view
+            view = 0;
+        else if(key == 'T' || key == 't')   //  current month
+        {
+            view = 0;
+            month=T._mon;
+            year=T._year;
+        }
+    }
+    while(key != 27);   //  run till ECS key is not pressed
+
+    return 0;
 }
